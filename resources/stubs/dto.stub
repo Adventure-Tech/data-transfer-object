@@ -1,0 +1,17 @@
+<?php
+
+namespace NAMESPACE;
+
+use AdventureTech\DataTransferObject\DataTransferObject;
+use Illuminate\Database\Eloquent\Model;
+use stdClass;
+
+class CLASS_NAME extends DataTransferObject
+{
+    public int $id;
+
+    public static function from(Model|array|stdClass $source): CLASS_NAME
+    {
+        return parent::from($source);
+    }
+}
