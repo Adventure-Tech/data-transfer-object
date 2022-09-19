@@ -2,8 +2,8 @@
 
 namespace AdventureTech\DataTransferObject;
 
-use AdventureTech\DataTransferObject\Exceptions\MissingPropertyTypeException;
 use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
+use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
 use AdventureTech\DataTransferObject\Reflection\DataTransferObjectProperty;
 
 final class ValidateProperty
@@ -14,22 +14,23 @@ final class ValidateProperty
 
     /**
      * @throws PropertyAssignmentException
-     * @throws MissingPropertyTypeException
+     * @throws PropertyTypeException
      */
     public static function validate(DataTransferObjectProperty $property): void
     {
         self::hasTypeDeclaration($property);
         self::hasCorrespondingSourceValue($property);
         self::requiredPropertyIsNotNull($property);
+        self::typeDeclarationIsArrayWhenJsonAttribute($property);
     }
 
     /**
-     * @throws MissingPropertyTypeException
+     * @throws PropertyTypeException
      */
     private static function hasTypeDeclaration(DataTransferObjectProperty $property): void
     {
         if (!$property->getType()) {
-            throw new MissingPropertyTypeException($property);
+            throw new PropertyTypeException("{$property->getDeclaringClassName()}'s property {$property->getName()} is missing a type declaration");
         }
     }
 
@@ -63,6 +64,16 @@ final class ValidateProperty
             throw new PropertyAssignmentException(
                 "{$property->getDeclaringClassName()}'s property {$property->getName()} does not allow null. Source property {$property->getSourcePropertyToMapFrom()} is null."
             );
+        }
+    }
+
+    /**
+     * @throws PropertyTypeException
+     */
+    private static function typeDeclarationIsArrayWhenJsonAttribute(DataTransferObjectProperty $property): void
+    {
+        if($property->isFromJson() && $property->getType() !== 'array'){
+            throw new PropertyTypeException('Attribute FromJson expects property to have type declaration array');
         }
     }
 }

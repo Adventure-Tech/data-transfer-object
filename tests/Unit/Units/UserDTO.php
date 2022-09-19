@@ -3,6 +3,7 @@
 namespace AdventureTech\DataTransferObject\Tests\Unit\Units;
 
 use AdventureTech\DataTransferObject\Attributes\DefaultValue;
+use AdventureTech\DataTransferObject\Attributes\FromJson;
 use AdventureTech\DataTransferObject\Attributes\MapFrom;
 use AdventureTech\DataTransferObject\Attributes\Optional;
 use AdventureTech\DataTransferObject\DataTransferObject;
@@ -18,6 +19,8 @@ class UserDTO extends DataTransferObject
     #[MapFrom('last_name')]
     public string $lastName;
     public string $email;
+    #[FromJson]
+    public array $address;
     #[MapFrom('created_at')]
     public Carbon $createdAt;
     #[MapFrom('deleted_at')]

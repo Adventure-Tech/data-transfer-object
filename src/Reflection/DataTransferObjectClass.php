@@ -3,7 +3,7 @@
 namespace AdventureTech\DataTransferObject\Reflection;
 
 use AdventureTech\DataTransferObject\DataTransferObject;
-use AdventureTech\DataTransferObject\Exceptions\MissingPropertyTypeException;
+use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
 use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
 use Illuminate\Support\Collection;
 use ReflectionClass;
@@ -23,7 +23,7 @@ final class DataTransferObjectClass
 
     /**
      * Get all public properties declared on the DataTransferObject
-     * @throws MissingPropertyTypeException
+     * @throws PropertyTypeException
      * @throws PropertyAssignmentException
      */
     public function getProperties(): Collection

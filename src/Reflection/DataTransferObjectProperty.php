@@ -3,10 +3,11 @@
 namespace AdventureTech\DataTransferObject\Reflection;
 
 use AdventureTech\DataTransferObject\Attributes\DefaultValue;
+use AdventureTech\DataTransferObject\Attributes\FromJson;
 use AdventureTech\DataTransferObject\Attributes\MapFrom;
 use AdventureTech\DataTransferObject\Attributes\Optional;
-use AdventureTech\DataTransferObject\Exceptions\MissingPropertyTypeException;
 use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
+use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
 use AdventureTech\DataTransferObject\ValidateProperty;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -21,7 +22,7 @@ final class DataTransferObjectProperty
     private stdClass $source;
 
     /**
-     * @throws MissingPropertyTypeException
+     * @throws PropertyTypeException
      * @throws PropertyAssignmentException
      */
     public function __construct(ReflectionProperty $reflectionProperty, stdClass $source)
@@ -131,6 +132,15 @@ final class DataTransferObjectProperty
     }
 
     /**
+     * Determine if the property has the FromJson attribute attached
+     * @return bool
+     */
+    public function isFromJson(): bool
+    {
+        return $this->hasAttribute(FromJson::class);
+    }
+
+    /**
      * Determine if the source property being mapped from is actually present on the source object
      * @return bool
      */
@@ -199,6 +209,9 @@ final class DataTransferObjectProperty
         }
         if ($this->isBoolean()) {
             return (bool) $value;
+        }
+        if($this->isFromJson()){
+            return (array) json_decode($value);
         }
         return $value;
     }

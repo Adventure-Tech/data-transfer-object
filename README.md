@@ -125,6 +125,17 @@ long as the DTO property is declared with the *bool* type.
 public bool $isPayed;
 ```
 
+#### Mapping from JSON properties
+
+If your database field is of the json type, you can use the attribute **#[FromJson]** on the DTO property.
+Note that the attribute expects the DTO property to be delared as type *array*. 
+
+```php
+// The dto will look for the address property on the source and convert it to associative array
+#[FromJson]
+public array $address;
+```
+
 #### Immutable fields
 
 Sadly PHP doesn't support immutable objects (yet). The *readonly* declaration is not supported by this

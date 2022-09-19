@@ -2,7 +2,7 @@
 
 namespace AdventureTech\DataTransferObject;
 
-use AdventureTech\DataTransferObject\Exceptions\MissingPropertyTypeException;
+use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
 use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
 use AdventureTech\DataTransferObject\Reflection\DataTransferObjectClass;
 use AdventureTech\DataTransferObject\Reflection\DataTransferObjectProperty;
@@ -76,7 +76,7 @@ abstract class DataTransferObject
 
     /**
      * @throws PropertyAssignmentException
-     * @throws MissingPropertyTypeException
+     * @throws PropertyTypeException
      */
     private function __construct(stdClass $source)
     {

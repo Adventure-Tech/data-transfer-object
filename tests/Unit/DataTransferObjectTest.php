@@ -11,6 +11,7 @@ beforeEach(function () {
         'email' => 'ola@example.com',
         'created_at' => '2022-09-19 12:00:00',
         'deleted_at' => null,
+        'address' => '{"address1": "Example 1", "address2": "Example 2"}'
     ];
 
     $this->dto = UserDTO::from($this->source);
@@ -37,4 +38,10 @@ test('createdAt property is carbon instance', function () {
 
 test('posts property has default value', function () {
     expect(is_array($this->dto->posts))->toBeTrue();
+});
+
+test('address property is decoded from json', function () {
+    expect($this->dto->address)->toBeArray();
+    $this->assertEquals('Example 1', $this->dto->address['address1']);
+    $this->assertEquals('Example 2', $this->dto->address['address2']);
 });
