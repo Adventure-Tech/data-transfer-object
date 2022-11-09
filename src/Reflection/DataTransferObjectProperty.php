@@ -244,7 +244,7 @@ final class DataTransferObjectProperty
             return (array) json_decode($value);
         }
         if ($this->isEnum()) {
-            return UserTypeEnum::from($value);
+            return $this->reflection->getType()->getName()::from($value);
         }
         return $value;
     }
