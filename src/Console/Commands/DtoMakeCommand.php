@@ -4,7 +4,6 @@ namespace AdventureTech\DataTransferObject\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Pluralizer;
 
 class DtoMakeCommand extends Command
 {
@@ -13,7 +12,9 @@ class DtoMakeCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'make:dto {name}';
+    protected $signature = 'make:dto 
+                            {name : Name of the new DTO class} 
+                            {--S|sub= : Specify a sub namespace, e.g User, resulting in App\DataTransferObjects\User being used}';
 
     /**
      * Name
@@ -87,8 +88,12 @@ class DtoMakeCommand extends Command
      */
     public function getStubVariables(): array
     {
+        $nameSpace = 'App\\DataTransferObjects';
+        if ($this->getSub()) {
+            $nameSpace = $nameSpace . "\\" . $this->getSub();
+        }
         return [
-            'NAMESPACE' => 'App\\Dto',
+            'NAMESPACE' => $nameSpace,
             'CLASS_NAME' => $this->name,
         ];
     }
@@ -131,7 +136,11 @@ class DtoMakeCommand extends Command
      */
     public function getSourceFilePath(): string
     {
-        return base_path('app/Dto').'/'.$this->name.'.php';
+        $basePath = 'app/DataTransferObjects';
+        if ($this->getSub()) {
+            $basePath = $basePath.'/'.$this->getSub();
+        }
+        return base_path($basePath).'/'.$this->name.'.php';
     }
 
     /**
@@ -147,5 +156,15 @@ class DtoMakeCommand extends Command
         }
 
         return $path;
+    }
+
+    protected function getSub(): ?string
+    {
+        if ($this->option('sub')) {
+            $sub = $this->option('sub');
+            $sub = strtolower($sub);
+            return ucfirst($sub);
+        }
+        return null;
     }
 }
