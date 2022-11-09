@@ -1,6 +1,7 @@
 <?php
 
 use AdventureTech\DataTransferObject\Tests\Unit\Units\UserDTO;
+use AdventureTech\DataTransferObject\Tests\Unit\Units\UserTypeEnum;
 use Carbon\Carbon;
 
 beforeEach(function () {
@@ -13,6 +14,7 @@ beforeEach(function () {
         'deleted_at' => null,
         'address' => '{"address1": "Example 1", "address2": "Example 2"}',
         'phone_numbers' => '{"primary" : "47004700", "secondary" : "47114711"}',
+        'user_type' => 'admin',
     ];
 
     $this->dto = UserDTO::from($this->source);
@@ -47,7 +49,11 @@ test('address property is decoded from json', function () {
     $this->assertEquals('Example 2', $this->dto->address['address2']);
 });
 
-test('phone numbers was decoded from json to dto', function() {
+test('phone numbers was decoded from json to dto', function () {
     expect($this->dto->phoneNumbers->primary)->toBe('47004700')
         ->and($this->dto->phoneNumbers->secondary)->toBe('47114711');
+});
+
+test('value can be cast to enum (backed enum)', function () {
+    expect($this->dto->userType)->toBe(UserTypeEnum::ADMIN);
 });

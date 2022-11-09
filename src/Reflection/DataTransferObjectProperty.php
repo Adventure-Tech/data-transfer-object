@@ -8,6 +8,7 @@ use AdventureTech\DataTransferObject\Attributes\MapFrom;
 use AdventureTech\DataTransferObject\Attributes\Optional;
 use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
 use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
+use AdventureTech\DataTransferObject\Tests\Unit\Units\UserTypeEnum;
 use AdventureTech\DataTransferObject\ValidateProperty;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -102,6 +103,15 @@ final class DataTransferObjectProperty
     public function isOptional(): bool
     {
         return $this->hasAttribute(Optional::class);
+    }
+
+    /**
+     * Determine if the property type is an enum
+     * @return bool
+     */
+    public function isEnum(): bool
+    {
+        return enum_exists($this->reflection->getType()->getName());
     }
 
     /**
@@ -232,6 +242,9 @@ final class DataTransferObjectProperty
                 return $castToDtoClassName::from(json_decode($value));
             }
             return (array) json_decode($value);
+        }
+        if ($this->isEnum()) {
+            return UserTypeEnum::from($value);
         }
         return $value;
     }

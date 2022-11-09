@@ -125,7 +125,7 @@ long as the DTO property is declared with the *bool* type.
 public bool $isPayed;
 ```
 
-#### Mapping from JSON properties
+#### Mapping from JSON
 
 If your database field is of the json type, you can use the attribute **#[FromJson]** on the DTO property.
 
@@ -142,6 +142,17 @@ public array $address;
 // The json data will be converted into AnotherDTO
 #[FromJson(AnotherDTO::class)]
 public array $address;
+```
+
+#### Mapping from Enum
+If your database field is of the type enum, you can create a corresponding enum class
+in you application and use it as type for your DTO property, and the value will automatically
+be cast to the correct enum value. It is important to note that your enum class must be backed
+by int or string to make this work. Read more about backed enums [here](https://www.php.net/manual/en/language.enumerations.backed.php).
+
+```php
+// The enum value from the database will be mapped to the correct enum value.
+public MyEnum $myEnum;
 ```
 
 #### Immutable fields
