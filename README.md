@@ -128,11 +128,19 @@ public bool $isPayed;
 #### Mapping from JSON properties
 
 If your database field is of the json type, you can use the attribute **#[FromJson]** on the DTO property.
-Note that the attribute expects the DTO property to be delared as type *array*. 
+
+If no argument is given to the attribute, it will assume the DTO property is of type array.
+Optionally you can provide another DTO class name as argument, and the json data will be converted to this class.
 
 ```php
 // The dto will look for the address property on the source and convert it to associative array
 #[FromJson]
+public array $address;
+```
+
+```php
+// The json data will be converted into AnotherDTO
+#[FromJson(AnotherDTO::class)]
 public array $address;
 ```
 

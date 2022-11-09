@@ -141,6 +141,22 @@ final class DataTransferObjectProperty
     }
 
     /**
+     * Return the DTO class name the json field should be cast to, if specified on the attribute
+     *
+     * @return string|null
+     */
+    public function castFromJsonToDto(): ?string
+    {
+        if (!$this->isFromJson()) {
+            return null;
+        }
+
+        $fromJsonAttribute = $this->getAttribute(FromJson::class);
+
+        return !empty($fromJsonAttribute->getArguments()) ? $fromJsonAttribute->getArguments()[0] : null;
+    }
+
+    /**
      * Determine if the source property being mapped from is actually present on the source object
      * @return bool
      */
@@ -210,7 +226,11 @@ final class DataTransferObjectProperty
         if ($this->isBoolean()) {
             return (bool) $value;
         }
-        if($this->isFromJson()){
+        if ($this->isFromJson()) {
+            $castToDtoClassName = $this->castFromJsonToDto();
+            if (!is_null($castToDtoClassName)) {
+                return $castToDtoClassName::from(json_decode($value));
+            }
             return (array) json_decode($value);
         }
         return $value;

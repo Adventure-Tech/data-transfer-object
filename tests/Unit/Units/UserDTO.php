@@ -21,6 +21,9 @@ class UserDTO extends DataTransferObject
     public string $email;
     #[FromJson]
     public array $address;
+    #[MapFrom('phone_numbers')]
+    #[FromJson(PhoneNumbersDTO::class)]
+    public PhoneNumbersDTO $phoneNumbers;
     #[MapFrom('created_at')]
     public Carbon $createdAt;
     #[MapFrom('deleted_at')]
