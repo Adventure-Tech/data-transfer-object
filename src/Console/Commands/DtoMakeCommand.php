@@ -14,7 +14,7 @@ class DtoMakeCommand extends Command
      */
     protected $signature = 'make:dto 
                             {name : Name of the new DTO class} 
-                            {--S|sub= : Specify a sub namespace, e.g User, resulting in App\DataTransferObjects\User being used}';
+                            {--D|dir= : Specify a subdirectory e.g User, resulting in App\DataTransferObjects\User being used}';
 
     /**
      * Name

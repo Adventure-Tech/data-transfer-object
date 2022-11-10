@@ -132,6 +132,11 @@ If your database field is of the json type, you can use the attribute **#[FromJs
 If no argument is given to the attribute, it will assume the DTO property is of type array.
 Optionally you can provide another DTO class name as argument, and the json data will be converted to this class.
 
+A second argument jsonIsSingularObject (true/false) can be provided to the attribute
+to specify if the json field data has a root array or if it is a single json object.
+Default value is true. Mix this with the previous argument, and you have the DTO property
+be an array of other DTO's.
+
 ```php
 // The dto will look for the address property on the source and convert it to associative array
 #[FromJson]
@@ -142,6 +147,11 @@ public array $address;
 // The json data will be converted into AnotherDTO
 #[FromJson(AnotherDTO::class)]
 public array $address;
+```
+
+```php
+#[FromJson(AddressDTO::class, false)]
+public array $address; // Will be an array of AddressDTO objects
 ```
 
 #### Mapping from Enum

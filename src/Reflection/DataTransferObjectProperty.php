@@ -8,7 +8,6 @@ use AdventureTech\DataTransferObject\Attributes\MapFrom;
 use AdventureTech\DataTransferObject\Attributes\Optional;
 use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
 use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
-use AdventureTech\DataTransferObject\Tests\Unit\Units\UserTypeEnum;
 use AdventureTech\DataTransferObject\ValidateProperty;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -166,6 +165,13 @@ final class DataTransferObjectProperty
         return !empty($fromJsonAttribute->getArguments()) ? $fromJsonAttribute->getArguments()[0] : null;
     }
 
+    public function jsonIsSingularObject(): bool
+    {
+        $fromJsonAttribute = $this->getAttribute(FromJson::class);
+
+        return $fromJsonAttribute->getArguments()[1] ?? true;
+    }
+
     /**
      * Determine if the source property being mapped from is actually present on the source object
      * @return bool
@@ -237,11 +243,27 @@ final class DataTransferObjectProperty
             return (bool) $value;
         }
         if ($this->isFromJson()) {
-            $castToDtoClassName = $this->castFromJsonToDto();
-            if (!is_null($castToDtoClassName)) {
-                return $castToDtoClassName::from(json_decode($value));
+            $resultArray = [];
+
+            if ($this->jsonIsSingularObject()) {
+                $jsonArray[] = (array) json_decode($value);
+            } else {
+                $jsonArray = json_decode($value);
             }
-            return (array) json_decode($value);
+
+            if (!is_null($this->castFromJsonToDto())) {
+                foreach ($jsonArray as $object) {
+                    $resultArray[] = $this->castFromJsonToDto()::from($object);
+                }
+            } else {
+                $resultArray = $jsonArray;
+            }
+
+            if ($this->jsonIsSingularObject()) {
+                return $resultArray[0];
+            }
+
+            return $resultArray;
         }
         if ($this->isEnum()) {
             return $this->reflection->getType()->getName()::from($value);

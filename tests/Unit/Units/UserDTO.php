@@ -24,6 +24,8 @@ class UserDTO extends DataTransferObject
     #[MapFrom('phone_numbers')]
     #[FromJson(PhoneNumbersDTO::class)]
     public PhoneNumbersDTO $phoneNumbers;
+    #[FromJson(PriceDTO::class, false)]
+    public array $prices;
     #[MapFrom('user_type')]
     public UserTypeEnum $userType;
     #[MapFrom('created_at')]

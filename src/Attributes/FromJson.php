@@ -12,9 +12,11 @@ use Attribute;
 final class FromJson
 {
     public readonly ?string $dtoClassName;
+    public readonly bool $jsonIsSingularObject;
 
-    public function __construct(?string $dtoClassName = null)
+    public function __construct(?string $dtoClassName = null, bool $jsonIsSingularObject = true)
     {
         $this->dtoClassName = $dtoClassName;
+        $this->jsonIsSingularObject = $jsonIsSingularObject;
     }
 }
