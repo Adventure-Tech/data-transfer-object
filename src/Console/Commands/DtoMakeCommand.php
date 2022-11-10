@@ -89,8 +89,8 @@ class DtoMakeCommand extends Command
     public function getStubVariables(): array
     {
         $nameSpace = 'App\\DataTransferObjects';
-        if ($this->getSub()) {
-            $nameSpace = $nameSpace . "\\" . $this->getSub();
+        if ($this->getDir()) {
+            $nameSpace = $nameSpace . "\\" . $this->getDir();
         }
         return [
             'NAMESPACE' => $nameSpace,
@@ -137,8 +137,8 @@ class DtoMakeCommand extends Command
     public function getSourceFilePath(): string
     {
         $basePath = 'app/DataTransferObjects';
-        if ($this->getSub()) {
-            $basePath = $basePath.'/'.$this->getSub();
+        if ($this->getDir()) {
+            $basePath = $basePath.'/'.$this->getDir();
         }
         return base_path($basePath).'/'.$this->name.'.php';
     }
@@ -158,12 +158,12 @@ class DtoMakeCommand extends Command
         return $path;
     }
 
-    protected function getSub(): ?string
+    protected function getDir(): ?string
     {
-        if ($this->option('sub')) {
-            $sub = $this->option('sub');
-            $sub = strtolower($sub);
-            return ucfirst($sub);
+        if ($this->option('dir')) {
+            $dir = $this->option('dir');
+            $dir = strtolower($dir);
+            return ucfirst($dir);
         }
         return null;
     }
