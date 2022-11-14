@@ -2,8 +2,8 @@
 
 namespace AdventureTech\DataTransferObject;
 
-use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
 use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
+use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
 use AdventureTech\DataTransferObject\Reflection\DataTransferObjectClass;
 use AdventureTech\DataTransferObject\Reflection\DataTransferObjectProperty;
 use Illuminate\Database\Eloquent\Model;
@@ -17,7 +17,8 @@ abstract class DataTransferObject
      * @param  array|stdClass|Model  $source
      * @return DataTransferObject
      */
-    public static function from(array|stdClass|Model $source): DataTransferObject{
+    public static function from(array|stdClass|Model $source): static
+    {
         return self::fromMixed($source);
     }
 
