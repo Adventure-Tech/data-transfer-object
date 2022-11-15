@@ -246,7 +246,13 @@ final class DataTransferObjectProperty
             $resultArray = [];
 
             if ($this->jsonIsSingularObject()) {
-                $jsonArray[] = (array) json_decode($value);
+                $json = json_decode($value);
+                // Fallback enables user to specify singular object even though the source json was wrapped in array
+                if (is_array($json)) {
+                    $jsonArray = $json;
+                } else {
+                    $jsonArray[] = (array) json_decode($value);
+                }
             } else {
                 $jsonArray = json_decode($value);
             }

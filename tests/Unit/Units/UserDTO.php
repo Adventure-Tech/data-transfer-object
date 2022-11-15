@@ -8,8 +8,6 @@ use AdventureTech\DataTransferObject\Attributes\MapFrom;
 use AdventureTech\DataTransferObject\Attributes\Optional;
 use AdventureTech\DataTransferObject\DataTransferObject;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
-use stdClass;
 
 class UserDTO extends DataTransferObject
 {
@@ -37,10 +35,4 @@ class UserDTO extends DataTransferObject
     // Relations
     #[DefaultValue([])]
     public array $posts;
-
-    // Optional override of parent::from() with the sole purpose of providing correct type hints.
-    public static function from(Model|array|stdClass $source): UserDTO
-    {
-        return parent::from($source);
-    }
 }
