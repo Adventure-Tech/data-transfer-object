@@ -254,7 +254,13 @@ final class DataTransferObjectProperty
                     $jsonArray[] = (array) json_decode($value);
                 }
             } else {
-                $jsonArray = json_decode($value);
+                // If the value is an array, the json has already been decoded in a previous iteration.
+                // This happens when there are nested dto's in the source structure
+                if (is_array($value)) {
+                    $jsonArray = $value;
+                } else {
+                    $jsonArray = json_decode($value);
+                }
             }
 
             if (!is_null($this->castFromJsonToDto())) {
