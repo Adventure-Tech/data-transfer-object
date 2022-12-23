@@ -300,6 +300,6 @@ final class DataTransferObjectProperty
      */
     public function getSourceValue(): mixed
     {
-        return $this->getSourcePropertyValue() ?: $this->getDefaultValue();
+        return !is_null($this->getSourcePropertyValue()) ? $this->getSourcePropertyValue() : $this->getDefaultValue();
     }
 }
