@@ -186,7 +186,7 @@ public string $weCanPretendThisIsImmutable;
 The package comes with an artisan command to create new DTO classes:
 
 ```bash
-php artisan dto:create --name=MyDTO
+php artisan make:dto --name=MyDTO
 ```
 
 ## Examples
