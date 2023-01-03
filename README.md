@@ -122,7 +122,7 @@ long as the DTO property is declared with the *bool* type.
 
 ```php
 // The source property value can be true/false or 0/1
-public bool $isPayed;
+public bool $isPaid;
 ```
 
 #### Mapping from JSON
@@ -221,12 +221,6 @@ class User extends DataTransferObject
     // Relations
     #[DefaultValue([])]
     public array $posts;
-
-    // Optional override of parent::from() with the sole purpose of providing correct type hints.
-    public static function from(Model|array|stdClass $source): User
-    {
-        return parent::from($source);
-    }
 }
 ```
 
