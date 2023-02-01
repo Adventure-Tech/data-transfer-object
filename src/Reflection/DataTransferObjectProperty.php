@@ -3,11 +3,12 @@
 namespace AdventureTech\DataTransferObject\Reflection;
 
 use AdventureTech\DataTransferObject\Attributes\DefaultValue;
-use AdventureTech\DataTransferObject\Attributes\FromJson;
+use AdventureTech\DataTransferObject\Attributes\JsonMapper;
 use AdventureTech\DataTransferObject\Attributes\MapFrom;
 use AdventureTech\DataTransferObject\Attributes\Optional;
 use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
 use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
+use AdventureTech\DataTransferObject\JsonMapper\MapFromJsonToDto;
 use AdventureTech\DataTransferObject\ValidateProperty;
 use Carbon\Carbon;
 use Illuminate\Support\Collection;
@@ -144,32 +145,30 @@ final class DataTransferObjectProperty
      * Determine if the property has the FromJson attribute attached
      * @return bool
      */
-    public function isFromJson(): bool
+    public function useJsonMapper(): bool
     {
-        return $this->hasAttribute(FromJson::class);
+        return $this->hasAttribute(JsonMapper::class);
     }
 
     /**
-     * Return the DTO class name the json field should be cast to, if specified on the attribute
+     * Return the name of the root class name that the json data should be mapped to.
+     * The root class may contain nested classes corresponding with the JSON structure.
      *
-     * @return string|null
+     * @return string
+     * @throws PropertyAssignmentException
      */
-    public function castFromJsonToDto(): ?string
+    public function getRootClassNameForJsonMapper(): string
     {
-        if (!$this->isFromJson()) {
-            return null;
+        if (!$this->useJsonMapper()) {
+            throw new PropertyAssignmentException(
+                "Trying to get a root class name from attribute JsonMapper, 
+               but no JsonMapper attribute was specified on this property"
+            );
         }
 
-        $fromJsonAttribute = $this->getAttribute(FromJson::class);
+        $fromJsonAttribute = $this->getAttribute(JsonMapper::class);
 
-        return !empty($fromJsonAttribute->getArguments()) ? $fromJsonAttribute->getArguments()[0] : null;
-    }
-
-    public function jsonIsSingularObject(): bool
-    {
-        $fromJsonAttribute = $this->getAttribute(FromJson::class);
-
-        return $fromJsonAttribute->getArguments()[1] ?? true;
+        return $fromJsonAttribute->getArguments()[0];
     }
 
     /**
@@ -215,6 +214,7 @@ final class DataTransferObjectProperty
     /**
      * Fetch the default value of this property if the DefaultValue attribute is attached.
      * @return mixed
+     * @throws PropertyAssignmentException
      */
     public function getDefaultValue(): mixed
     {
@@ -230,6 +230,7 @@ final class DataTransferObjectProperty
      * Inspects the type declaration of this property and casts the value if necessary
      * @param  mixed  $value
      * @return mixed
+     * @throws PropertyAssignmentException
      */
     private function castValue(mixed $value): mixed
     {
@@ -242,40 +243,8 @@ final class DataTransferObjectProperty
         if ($this->isBoolean()) {
             return (bool) $value;
         }
-        if ($this->isFromJson()) {
-            $resultArray = [];
-
-            if ($this->jsonIsSingularObject()) {
-                $json = json_decode($value);
-                // Fallback enables user to specify singular object even though the source json was wrapped in array
-                if (is_array($json)) {
-                    $jsonArray = $json;
-                } else {
-                    $jsonArray[] = (array) json_decode($value);
-                }
-            } else {
-                // If the value is an array, the json has already been decoded in a previous iteration.
-                // This happens when there are nested dto's in the source structure
-                if (is_array($value)) {
-                    $jsonArray = $value;
-                } else {
-                    $jsonArray = json_decode($value);
-                }
-            }
-
-            if (!is_null($this->castFromJsonToDto())) {
-                foreach ($jsonArray as $object) {
-                    $resultArray[] = $this->castFromJsonToDto()::from($object);
-                }
-            } else {
-                $resultArray = $jsonArray;
-            }
-
-            if ($this->jsonIsSingularObject()) {
-                return $resultArray[0];
-            }
-
-            return $resultArray;
+        if ($this->useJsonMapper()) {
+            return MapFromJsonToDto::map($this->getRootClassNameForJsonMapper(), $value);
         }
         if ($this->isEnum()) {
             return $this->reflection->getType()->getName()::from($value);
@@ -286,6 +255,7 @@ final class DataTransferObjectProperty
     /**
      * Get the value mapped from the source object
      * @return mixed
+     * @throws PropertyAssignmentException
      */
     private function getSourcePropertyValue(): mixed
     {

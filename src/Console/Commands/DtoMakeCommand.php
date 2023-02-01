@@ -62,9 +62,9 @@ class DtoMakeCommand extends Command
 
         if (!$this->files->exists($path)) {
             $this->files->put($path, $contents);
-            $this->info("DTO : {$path} was created");
+            $this->info("DTO : $path was created");
         } else {
-            $this->error("DTO : {$path} already exits");
+            $this->error("DTO : $path already exits");
         }
 
     }

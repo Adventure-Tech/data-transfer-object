@@ -1,9 +1,8 @@
 <?php
 
-namespace AdventureTech\DataTransferObject\Tests\Unit\Units;
+namespace AdventureTech\DataTransferObject\Tests\Unit\TestDto;
 
 use AdventureTech\DataTransferObject\Attributes\DefaultValue;
-use AdventureTech\DataTransferObject\Attributes\FromJson;
 use AdventureTech\DataTransferObject\Attributes\MapFrom;
 use AdventureTech\DataTransferObject\Attributes\Optional;
 use AdventureTech\DataTransferObject\DataTransferObject;
@@ -17,13 +16,6 @@ class UserDTO extends DataTransferObject
     #[MapFrom('last_name')]
     public string $lastName;
     public string $email;
-    #[FromJson]
-    public array $address;
-    #[MapFrom('phone_numbers')]
-    #[FromJson(PhoneNumbersDTO::class)]
-    public PhoneNumbersDTO $phoneNumbers;
-    #[FromJson(PriceDTO::class, false)]
-    public array $prices;
     #[MapFrom('user_type')]
     public UserTypeEnum $userType;
     #[MapFrom('created_at')]

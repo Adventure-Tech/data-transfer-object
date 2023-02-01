@@ -2,9 +2,9 @@
 
 use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
 use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
-use AdventureTech\DataTransferObject\Tests\Unit\Units\FooDTO;
-use AdventureTech\DataTransferObject\Tests\Unit\Units\UserDTO;
-use AdventureTech\DataTransferObject\Tests\Unit\Units\UserDTOMissingType;
+use AdventureTech\DataTransferObject\Tests\Unit\TestDto\FooDTO;
+use AdventureTech\DataTransferObject\Tests\Unit\TestDto\UserDTO;
+use AdventureTech\DataTransferObject\Tests\Unit\TestDto\UserDTOMissingType;
 
 test('Error when property is not mapped correctly', function () {
     $this->source = [
@@ -47,15 +47,4 @@ test('Error when a field is non optional, but source value is null', function ()
 })->throws(
     PropertyAssignmentException::class,
     FooDTO::class."'s property value2 does not allow null. Source property value2 is null."
-);
-
-test('Error when json property is not declared as array', function () {
-    $source = [
-        'address' => '{"address1": "65357 Kilback Meadow Suite 783\nPaucekhaven, MT 30416-5985", "address2": "3137 Alexie Stream\nEast Alexandremouth, AL 21592"}'
-    ];
-
-    \AdventureTech\DataTransferObject\Tests\Unit\Units\AddressDTO::from($source);
-})->throws(
-    PropertyTypeException::class,
-    'Attribute FromJson expects property to have type declaration array'
 );

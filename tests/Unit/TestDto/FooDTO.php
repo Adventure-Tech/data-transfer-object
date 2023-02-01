@@ -1,6 +1,6 @@
 <?php
 
-namespace AdventureTech\DataTransferObject\Tests\Unit\Units;
+namespace AdventureTech\DataTransferObject\Tests\Unit\TestDto;
 
 use AdventureTech\DataTransferObject\DataTransferObject;
 

@@ -127,31 +127,45 @@ public bool $isPaid;
 
 #### Mapping from JSON
 
-If your database field is of the json type, you can use the attribute **#[FromJson]** on the DTO property.
+The package uses the [JsonMapper](https://github.com/cweiske/jsonmapper) library to work with database json fields. 
+The library allows us to map entire json structures to a nested DTO structure.
 
-If no argument is given to the attribute, it will assume the DTO property is of type array.
-Optionally you can provide another DTO class name as argument, and the json data will be converted to this class.
-
-A second argument jsonIsSingularObject (true/false) can be provided to the attribute
-to specify if the json field data has a root array or if it is a single json object.
-Default value is true. Mix this with the previous argument, and you have the DTO property
-be an array of other DTO's.
+The way this works is that you need to specify a root class on your DTO and annotate it with the ``#[JsonMapper]``
+attribute. This root class should not be an instance of the DataTransferObject, but instead be a POPO 
+(Plain Old Php Object). Each sub class matching the JSON structure should also be a POPO with docblock annotations 
+according to the library api. Visit the library's GitHub page to read more on how use nested structures.
 
 ```php
-// The dto will look for the address property on the source and convert it to associative array
-#[FromJson]
-public array $address;
+// The main DTO
+class Person extends DataTransferObject
+{
+    #[MapFrom('first_name')]
+    public string $firstName;
+
+    #[JsonMapper(Address::class)]
+    public Address $address;
+}
 ```
 
 ```php
-// The json data will be converted into AnotherDTO
-#[FromJson(AnotherDTO::class)]
-public array $address;
+// The Address POPO
+class Address
+{
+    public string $street;
+    public string $zip;
+    public string $city;
+}
 ```
 
-```php
-#[FromJson(AddressDTO::class, false)]
-public array $address; // Will be an array of AddressDTO objects
+```javascript
+let sourceJsonStructure = {
+    "first_name": "John",
+    "address": {
+        "street": "Example street",
+        "zip": "0000",
+        "city": "Example city" 
+    }
+}
 ```
 
 #### Mapping from Enum

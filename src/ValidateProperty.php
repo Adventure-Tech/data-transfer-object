@@ -21,7 +21,6 @@ final class ValidateProperty
         self::hasTypeDeclaration($property);
         self::hasCorrespondingSourceValue($property);
         self::requiredPropertyIsNotNull($property);
-        self::typeDeclarationIsArrayWhenJsonAttribute($property);
     }
 
     /**
@@ -64,22 +63,6 @@ final class ValidateProperty
             throw new PropertyAssignmentException(
                 "{$property->getDeclaringClassName()}'s property {$property->getName()} does not allow null. Source property {$property->getSourcePropertyToMapFrom()} is null."
             );
-        }
-    }
-
-    /**
-     * @throws PropertyTypeException
-     */
-    private static function typeDeclarationIsArrayWhenJsonAttribute(DataTransferObjectProperty $property): void
-    {
-        if (
-            $property->isFromJson()
-            && is_null($property->castFromJsonToDto())
-            && $property->getType() !== 'array'
-        ) {
-            throw new PropertyTypeException(
-                'Attribute FromJson expects property to have type declaration array. 
-                Change the property data type to array, or specify a DTO that the data should be cast to on the FromJson attribute.');
         }
     }
 }

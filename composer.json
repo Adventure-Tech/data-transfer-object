@@ -17,8 +17,9 @@
   ],
   "require": {
     "php": "^8.1",
+    "laravel/framework": "^9.0",
     "nesbot/carbon": "^2.0",
-    "laravel/framework": "^9.0"
+    "netresearch/jsonmapper": "^4.1"
   },
   "require-dev": {
     "jetbrains/phpstorm-attributes": "^1.0",
