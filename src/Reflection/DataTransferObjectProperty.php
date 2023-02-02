@@ -142,7 +142,7 @@ final class DataTransferObjectProperty
     }
 
     /**
-     * Determine if the property has the FromJson attribute attached
+     * Determine if the property has the JsonMapper attribute attached
      * @return bool
      */
     public function useJsonMapper(): bool
