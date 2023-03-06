@@ -6,6 +6,7 @@ use AdventureTech\DataTransferObject\Attributes\DefaultValue;
 use AdventureTech\DataTransferObject\Attributes\JsonMapper;
 use AdventureTech\DataTransferObject\Attributes\MapFrom;
 use AdventureTech\DataTransferObject\Attributes\Optional;
+use AdventureTech\DataTransferObject\Attributes\Trigger;
 use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
 use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
 use AdventureTech\DataTransferObject\JsonMapper\MapFromJsonToDto;
@@ -36,6 +37,7 @@ final class DataTransferObjectProperty
 
     /**
      * Get the name of the property
+     *
      * @return string
      */
     public function getName(): string
@@ -45,6 +47,7 @@ final class DataTransferObjectProperty
 
     /**
      * Get the declared type of the property
+     *
      * @return ?string
      */
     public function getType(): ?string
@@ -54,6 +57,7 @@ final class DataTransferObjectProperty
 
     /**
      * Get the name of the class this property belongs to
+     *
      * @return string
      */
     public function getDeclaringClassName(): string
@@ -63,10 +67,11 @@ final class DataTransferObjectProperty
 
     /**
      * Fetch a specific attribute if attached to property
+     *
      * @param  string  $attributeName
      * @return ReflectionAttribute|null
      */
-    public function getAttribute(string $attributeName): ?ReflectionAttribute
+    private function getAttribute(string $attributeName): ?ReflectionAttribute
     {
         foreach ($this->attributes as $attribute) {
             if ($attribute->getName() == $attributeName) {
@@ -78,16 +83,18 @@ final class DataTransferObjectProperty
 
     /**
      * Check if a specific attribute is attached to the property
+     *
      * @param  string  $attributeName
      * @return bool
      */
-    public function hasAttribute(string $attributeName): bool
+    private function hasAttribute(string $attributeName): bool
     {
         return (bool) $this->getAttribute($attributeName);
     }
 
     /**
      * Determine which source property to map value from
+     *
      * @return string
      */
     public function getSourcePropertyToMapFrom(): string
@@ -98,24 +105,27 @@ final class DataTransferObjectProperty
 
     /**
      * Determine if the property has the Optional attribute attached
+     *
      * @return bool
      */
-    public function isOptional(): bool
+    private function isOptional(): bool
     {
         return $this->hasAttribute(Optional::class);
     }
 
     /**
      * Determine if the property type is an enum
+     *
      * @return bool
      */
-    public function isEnum(): bool
+    private function isEnum(): bool
     {
         return enum_exists($this->reflection->getType()->getName());
     }
 
     /**
      * Alias for the isOptional() method
+     *
      * @return bool
      */
     public function isRequired(): bool
@@ -125,6 +135,7 @@ final class DataTransferObjectProperty
 
     /**
      * Determine if the property is declared nullable
+     *
      * @return bool
      */
     public function allowsNull(): bool
@@ -134,6 +145,7 @@ final class DataTransferObjectProperty
 
     /**
      * Check if the DefaultValue attribute is attached to the property
+     *
      * @return bool
      */
     public function hasDefaultValue(): bool
@@ -142,12 +154,35 @@ final class DataTransferObjectProperty
     }
 
     /**
-     * Determine if the property has the JsonMapper attribute attached
+     * Determine if property has the JsonMapper attribute attached
+     *
      * @return bool
      */
-    public function useJsonMapper(): bool
+    private function useJsonMapper(): bool
     {
         return $this->hasAttribute(JsonMapper::class);
+    }
+
+    /**
+     * Determine if property has the Trigger attribute attached
+     *
+     * @return bool
+     */
+    public function hasTrigger(): bool
+    {
+        return $this->hasAttribute(Trigger::class);
+    }
+
+    /**
+     * Return the method name provided the the Trigger attribute
+     *
+     * @return string
+     */
+    public function getTriggerMethodName(): string
+    {
+        $triggerAttribute = $this->getAttribute(Trigger::class);
+
+        return $triggerAttribute->getArguments()[0];
     }
 
     /**
@@ -157,7 +192,7 @@ final class DataTransferObjectProperty
      * @return string
      * @throws PropertyAssignmentException
      */
-    public function getRootClassNameForJsonMapper(): string
+    private function getRootClassNameForJsonMapper(): string
     {
         if (!$this->useJsonMapper()) {
             throw new PropertyAssignmentException(
@@ -173,6 +208,7 @@ final class DataTransferObjectProperty
 
     /**
      * Determine if the source property being mapped from is actually present on the source object
+     *
      * @return bool
      */
     public function propertyIsNotPresentOnSourceObject(): bool
@@ -183,6 +219,7 @@ final class DataTransferObjectProperty
     /**
      * Check if the source property being mapped from is null
      * Assumed the property is present on the source object
+     *
      * @return bool
      */
     public function sourcePropertyIsNull(): bool
@@ -195,28 +232,31 @@ final class DataTransferObjectProperty
 
     /**
      * Check if property has a type declaration of Carbon
+     *
      * @return bool
      */
-    public function isCarbon(): bool
+    private function isCarbon(): bool
     {
         return $this->reflection->getType()->getName() === 'Carbon\Carbon';
     }
 
     /**
      * Check property has a type declaration of bool
+     *
      * @return bool
      */
-    public function isBoolean(): bool
+    private function isBoolean(): bool
     {
         return $this->reflection->getType()->getName() === 'bool';
     }
 
     /**
      * Fetch the default value of this property if the DefaultValue attribute is attached.
+     *
      * @return mixed
      * @throws PropertyAssignmentException
      */
-    public function getDefaultValue(): mixed
+    private function getDefaultValue(): mixed
     {
         $defaultValueAttribute = $this->getAttribute(DefaultValue::class);
 
@@ -228,6 +268,7 @@ final class DataTransferObjectProperty
 
     /**
      * Inspects the type declaration of this property and casts the value if necessary
+     *
      * @param  mixed  $value
      * @return mixed
      * @throws PropertyAssignmentException
@@ -254,6 +295,7 @@ final class DataTransferObjectProperty
 
     /**
      * Get the value mapped from the source object
+     *
      * @return mixed
      * @throws PropertyAssignmentException
      */
@@ -267,9 +309,31 @@ final class DataTransferObjectProperty
 
     /**
      * Map and return the value from the source object
+     *
+     * @return mixed
+     * @throws PropertyAssignmentException
      */
     public function getSourceValue(): mixed
     {
         return !is_null($this->getSourcePropertyValue()) ? $this->getSourcePropertyValue() : $this->getDefaultValue();
+    }
+
+    /**
+     * Determine if the property must be assigned a value or not
+     *
+     * @return bool
+     */
+    public function valueAssignmentCanBeSkipped(): bool
+    {
+        // Can be skipped if optional
+        if ($this->propertyIsNotPresentOnSourceObject() && $this->isOptional() && !$this->hasDefaultValue()) {
+            return true;
+        }
+        // Can be skipped if trigger is attached
+        if ($this->hasTrigger()) {
+            return true;
+        }
+
+        return false;
     }
 }

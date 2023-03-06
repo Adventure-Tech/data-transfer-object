@@ -41,7 +41,8 @@ final class ValidateProperty
         if (
             $property->isRequired() &&
             $property->propertyIsNotPresentOnSourceObject() &&
-            !$property->hasDefaultValue()
+            !$property->hasDefaultValue() &&
+            !$property->hasTrigger()
         ) {
             throw new PropertyAssignmentException(
                 "{$property->getDeclaringClassName()}'s property {$property->getName()} is non optional and must have corresponding property on the source"
@@ -58,11 +59,15 @@ final class ValidateProperty
             !$property->allowsNull() &&
             $property->isRequired() &&
             $property->sourcePropertyIsNull() &&
-            !$property->hasDefaultValue()
+            !$property->hasDefaultValue() &&
+            !$property->hasTrigger()
         ) {
             throw new PropertyAssignmentException(
                 "{$property->getDeclaringClassName()}'s property {$property->getName()} does not allow null. Source property {$property->getSourcePropertyToMapFrom()} is null."
             );
         }
     }
+
+    // TODO: Trigger method must be present on dto when trigger attribute is present
+    // Trigger method must be public or protected
 }

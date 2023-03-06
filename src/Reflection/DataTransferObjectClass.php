@@ -3,8 +3,8 @@
 namespace AdventureTech\DataTransferObject\Reflection;
 
 use AdventureTech\DataTransferObject\DataTransferObject;
-use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
 use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
+use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
 use Illuminate\Support\Collection;
 use ReflectionClass;
 use ReflectionProperty;
@@ -13,29 +13,62 @@ use stdClass;
 final class DataTransferObjectClass
 {
     private ReflectionClass $reflection;
+    private Collection $dtoProperties;
     private stdClass $source;
 
-    public function __construct(DataTransferObject $dataTransferObject, stdClass $source)
-    {
-        $this->reflection = new ReflectionClass($dataTransferObject);
-        $this->source = $source;
-    }
-
     /**
-     * Get all public properties declared on the DataTransferObject
      * @throws PropertyTypeException
      * @throws PropertyAssignmentException
      */
+    public function __construct(DataTransferObject $dataTransferObject, stdClass $source)
+    {
+        $this->reflection = new ReflectionClass($dataTransferObject);
+        $this->dtoProperties = Collection::empty();
+        $this->source = $source;
+        $this->setDataTransferObjectReflectionProperties();
+    }
+
+    /**
+     * Traverse all DTO properties and create a reflection property
+     *
+     * @throws PropertyTypeException
+     * @throws PropertyAssignmentException
+     */
+    private function setDataTransferObjectReflectionProperties(): void
+    {
+        foreach ($this->reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $reflectionProperty) {
+            $this->dtoProperties->add(
+                new DataTransferObjectProperty($reflectionProperty, $this->source)
+            );
+        }
+    }
+
+    /**
+     * Return all reflection properties to this DTO
+     *
+     * @return Collection
+     */
     public function getProperties(): Collection
     {
-        $dataTransferObjectProperties = Collection::empty();
-        $reflectionProperties = $this->reflection->getProperties(ReflectionProperty::IS_PUBLIC);
+        return $this->dtoProperties;
+    }
 
-        foreach ($reflectionProperties as $prop) {
-            $dataTransferObjectProperties->add(new DataTransferObjectProperty($prop, $this->source));
-        }
+    /**
+     * Get all the defined trigger method names for this DTO
+     *
+     * @return Collection
+     */
+    public function getTriggerMethodNames(): Collection
+    {
+        $methodNames = Collection::empty();
 
-        return $dataTransferObjectProperties;
+        $this->dtoProperties->each(function (DataTransferObjectProperty $property) use ($methodNames) {
+            if ($property->hasTrigger()) {
+                $methodNames->add($property->getTriggerMethodName());
+            }
+        });
+
+        return $methodNames;
     }
 
 }

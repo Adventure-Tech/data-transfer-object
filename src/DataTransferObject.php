@@ -7,13 +7,17 @@ use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
 use AdventureTech\DataTransferObject\Reflection\DataTransferObjectClass;
 use AdventureTech\DataTransferObject\Reflection\DataTransferObjectProperty;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Collection;
 use stdClass;
 
 abstract class DataTransferObject
 {
+    protected Collection $triggerMethodNames;
+
     /**
      * The only method that can be called publicly to create a new DTO.
      * Can optionally be overridden on children to ensure correct type hinting.
+     *
      * @param  array|stdClass|Model  $source
      * @return DataTransferObject
      */
@@ -24,6 +28,7 @@ abstract class DataTransferObject
 
     /**
      * Create new DTO from one of the supported types
+     *
      * @param  array|stdClass|Model  $source
      * @return DataTransferObject
      */
@@ -38,6 +43,7 @@ abstract class DataTransferObject
 
     /**
      * Create new DTO from Eloquent model
+     *
      * @param  Model  $model
      * @return DataTransferObject
      */
@@ -48,6 +54,7 @@ abstract class DataTransferObject
 
     /**
      * Create new DTO from array
+     *
      * @param  array  $values
      * @return DataTransferObject
      */
@@ -58,21 +65,31 @@ abstract class DataTransferObject
 
     /**
      * Create new DTO from stdClass
+     *
      * @param  stdClass  $source
      * @return DataTransferObject
      */
     private static function fromStdClass(stdClass $source): DataTransferObject
     {
-        $class = get_called_class();
-        return new $class($source);
+        $calledClassName = get_called_class();
+        $newDto = new $calledClassName($source);
+        $newDto->callTriggerMethodsAfterConstruction();
+        return $newDto;
     }
 
     private function setPropertyValue(DataTransferObjectProperty $property, mixed $propertyValue): void
     {
-        if ($property->propertyIsNotPresentOnSourceObject() && $property->isOptional() && !$property->hasDefaultValue()) {
+        if ($property->valueAssignmentCanBeSkipped()) {
             return;
         }
         $this->{$property->getName()} = $propertyValue;
+    }
+
+    protected function callTriggerMethodsAfterConstruction(): void
+    {
+        $this->triggerMethodNames->each(function (string $methodName) {
+            $this->{$methodName}();
+        });
     }
 
     /**
@@ -81,11 +98,14 @@ abstract class DataTransferObject
      */
     private function __construct(stdClass $source)
     {
-        $class = new DataTransferObjectClass($this, $source);
+        $reflectionClass = new DataTransferObjectClass($this, $source);
 
         // Map all values from the source to the DataTransferObject
-        $class->getProperties()->each(function (DataTransferObjectProperty $property) use ($source) {
+        $reflectionClass->getProperties()->each(function (DataTransferObjectProperty $property) use ($source) {
             $this->setPropertyValue($property, $property->getSourceValue());
         });
+
+        $this->triggerMethodNames = $reflectionClass->getTriggerMethodNames();
     }
+
 }
