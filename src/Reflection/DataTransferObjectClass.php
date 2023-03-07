@@ -3,8 +3,7 @@
 namespace AdventureTech\DataTransferObject\Reflection;
 
 use AdventureTech\DataTransferObject\DataTransferObject;
-use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
-use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
+use AdventureTech\DataTransferObject\Exceptions\PropertyValidationException;
 use Illuminate\Support\Collection;
 use ReflectionClass;
 use ReflectionProperty;
@@ -17,8 +16,7 @@ final class DataTransferObjectClass
     private stdClass $source;
 
     /**
-     * @throws PropertyTypeException
-     * @throws PropertyAssignmentException
+     * @throws PropertyValidationException
      */
     public function __construct(DataTransferObject $dataTransferObject, stdClass $source)
     {
@@ -31,8 +29,7 @@ final class DataTransferObjectClass
     /**
      * Traverse all DTO properties and create a reflection property
      *
-     * @throws PropertyTypeException
-     * @throws PropertyAssignmentException
+     * @throws PropertyValidationException
      */
     private function setDataTransferObjectReflectionProperties(): void
     {

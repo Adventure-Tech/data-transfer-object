@@ -8,7 +8,7 @@ use AdventureTech\DataTransferObject\Attributes\MapFrom;
 use AdventureTech\DataTransferObject\Attributes\Optional;
 use AdventureTech\DataTransferObject\Attributes\Trigger;
 use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
-use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
+use AdventureTech\DataTransferObject\Exceptions\PropertyValidationException;
 use AdventureTech\DataTransferObject\JsonMapper\MapFromJsonToDto;
 use AdventureTech\DataTransferObject\ValidateProperty;
 use Carbon\Carbon;
@@ -24,8 +24,7 @@ final class DataTransferObjectProperty
     private stdClass $source;
 
     /**
-     * @throws PropertyTypeException
-     * @throws PropertyAssignmentException
+     * @throws PropertyValidationException
      */
     public function __construct(ReflectionProperty $reflectionProperty, stdClass $source)
     {

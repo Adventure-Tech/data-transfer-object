@@ -194,6 +194,32 @@ assign a value to an immutable property. It does not prevent you from doing so.
 #[Immutable]
 public string $weCanPretendThisIsImmutable;
 ```
+#### Triggers
+
+The `#[Trigger]` attribute provides a way do initialize properties after other properties mapped from source have been initialized.
+Typical use of this attribute is that you want to do some computation on the DTO data, and store it as a property.
+
+The attribute requires one argument, namely the method that will be triggered to initialize the property.
+Let's take a look at an example where we want to concatenate the user's name and store it as a new property.
+
+```php
+class User extends DataTransferObject
+{
+    #[MapFrom('first_name')]
+    public string $firstName;
+
+    #[MapFrom('last_name')]
+    public string $lastName;
+
+    #[Trigger('setFullName')]    
+    public string $fullName;
+    
+    protected function setFullName()
+    {
+        $this->fullName = $this->firstName . ' ' . $this->lastName; 
+    }
+}
+```
 
 ## Laravel Artisan
 

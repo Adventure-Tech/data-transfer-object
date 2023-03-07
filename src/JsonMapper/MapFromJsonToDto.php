@@ -20,6 +20,9 @@ class MapFromJsonToDto
         $this->mapper->bEnforceMapType = false;
     }
 
+    /**
+     * @throws PropertyAssignmentException
+     */
     public function mapJsonAndReturnRootObject(): mixed
     {
         try {

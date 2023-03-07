@@ -2,8 +2,7 @@
 
 namespace AdventureTech\DataTransferObject;
 
-use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
-use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
+use AdventureTech\DataTransferObject\Exceptions\PropertyValidationException;
 use AdventureTech\DataTransferObject\Reflection\DataTransferObjectProperty;
 
 final class ValidateProperty
@@ -13,28 +12,29 @@ final class ValidateProperty
     }
 
     /**
-     * @throws PropertyAssignmentException
-     * @throws PropertyTypeException
+     * @throws PropertyValidationException
      */
     public static function validate(DataTransferObjectProperty $property): void
     {
         self::hasTypeDeclaration($property);
         self::hasCorrespondingSourceValue($property);
         self::requiredPropertyIsNotNull($property);
+        self::triggerMethodMustBePresentOnDto($property);
+        self::triggerMethodCanNotBePrivate($property);
     }
 
     /**
-     * @throws PropertyTypeException
+     * @throws PropertyValidationException
      */
     private static function hasTypeDeclaration(DataTransferObjectProperty $property): void
     {
         if (!$property->getType()) {
-            throw new PropertyTypeException("{$property->getDeclaringClassName()}'s property {$property->getName()} is missing a type declaration");
+            throw new PropertyValidationException("{$property->getDeclaringClassName()}'s property {$property->getName()} is missing a type declaration");
         }
     }
 
     /**
-     * @throws PropertyAssignmentException
+     * @throws PropertyValidationException
      */
     private static function hasCorrespondingSourceValue(DataTransferObjectProperty $property): void
     {
@@ -44,14 +44,14 @@ final class ValidateProperty
             !$property->hasDefaultValue() &&
             !$property->hasTrigger()
         ) {
-            throw new PropertyAssignmentException(
+            throw new PropertyValidationException(
                 "{$property->getDeclaringClassName()}'s property {$property->getName()} is non optional and must have corresponding property on the source"
             );
         }
     }
 
     /**
-     * @throws PropertyAssignmentException
+     * @throws PropertyValidationException
      */
     private static function requiredPropertyIsNotNull(DataTransferObjectProperty $property): void
     {
@@ -62,12 +62,44 @@ final class ValidateProperty
             !$property->hasDefaultValue() &&
             !$property->hasTrigger()
         ) {
-            throw new PropertyAssignmentException(
+            throw new PropertyValidationException(
                 "{$property->getDeclaringClassName()}'s property {$property->getName()} does not allow null. Source property {$property->getSourcePropertyToMapFrom()} is null."
             );
         }
     }
 
-    // TODO: Trigger method must be present on dto when trigger attribute is present
+    /**
+     * @throws PropertyValidationException
+     */
+    private static function triggerMethodMustBePresentOnDto(DataTransferObjectProperty $property)
+    {
+        if ($property->hasTrigger()) {
+            try {
+                $methodNameToValidate = $property->getTriggerMethodName();
+                $dtoReflection = new \ReflectionClass($property->getDeclaringClassName());
+                $dtoReflection->getMethod($methodNameToValidate);
+            } catch (\ReflectionException $ex) {
+                throw new PropertyValidationException(
+                    "{$property->getDeclaringClassName()}'s property {$property->getName()} is registered with 
+                    a trigger attribute that expects the method name $methodNameToValidate to exist on this DTO"
+                );
+            }
+
+        }
+    }
+
     // Trigger method must be public or protected
+    private static function triggerMethodCanNotBePrivate(DataTransferObjectProperty $property)
+    {
+        if ($property->hasTrigger()) {
+            $methodNameToValidate = $property->getTriggerMethodName();
+            $dtoReflection = new \ReflectionClass($property->getDeclaringClassName());
+            $reflectionMethod = $dtoReflection->getMethod($methodNameToValidate);
+            if ($reflectionMethod->isPrivate()) {
+                throw new PropertyValidationException(
+                    "Trigger methods can must be public of protected"
+                );
+            }
+        }
+    }
 }

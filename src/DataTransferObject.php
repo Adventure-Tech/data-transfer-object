@@ -3,17 +3,14 @@
 namespace AdventureTech\DataTransferObject;
 
 use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
-use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
+use AdventureTech\DataTransferObject\Exceptions\PropertyValidationException;
 use AdventureTech\DataTransferObject\Reflection\DataTransferObjectClass;
 use AdventureTech\DataTransferObject\Reflection\DataTransferObjectProperty;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Collection;
 use stdClass;
 
 abstract class DataTransferObject
 {
-    protected Collection $triggerMethodNames;
-
     /**
      * The only method that can be called publicly to create a new DTO.
      * Can optionally be overridden on children to ensure correct type hinting.
@@ -71,10 +68,8 @@ abstract class DataTransferObject
      */
     private static function fromStdClass(stdClass $source): DataTransferObject
     {
-        $calledClassName = get_called_class();
-        $newDto = new $calledClassName($source);
-        $newDto->callTriggerMethodsAfterConstruction();
-        return $newDto;
+        $class = get_called_class();
+        return new $class($source);
     }
 
     private function setPropertyValue(DataTransferObjectProperty $property, mixed $propertyValue): void
@@ -85,27 +80,23 @@ abstract class DataTransferObject
         $this->{$property->getName()} = $propertyValue;
     }
 
-    protected function callTriggerMethodsAfterConstruction(): void
-    {
-        $this->triggerMethodNames->each(function (string $methodName) {
-            $this->{$methodName}();
-        });
-    }
-
     /**
      * @throws PropertyAssignmentException
-     * @throws PropertyTypeException
+     * @throws PropertyValidationException
      */
     private function __construct(stdClass $source)
     {
-        $reflectionClass = new DataTransferObjectClass($this, $source);
+        $class = new DataTransferObjectClass($this, $source);
 
         // Map all values from the source to the DataTransferObject
-        $reflectionClass->getProperties()->each(function (DataTransferObjectProperty $property) use ($source) {
+        $class->getProperties()->each(function (DataTransferObjectProperty $property) use ($source) {
             $this->setPropertyValue($property, $property->getSourceValue());
         });
 
-        $this->triggerMethodNames = $reflectionClass->getTriggerMethodNames();
+        // Call all trigger methods
+        $methodNames = $class->getTriggerMethodNames();
+        $methodNames->each(function (string $methodName) {
+            $this->{$methodName}();
+        });
     }
-
 }

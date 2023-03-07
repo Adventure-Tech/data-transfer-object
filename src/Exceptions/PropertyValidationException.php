@@ -4,6 +4,6 @@ namespace AdventureTech\DataTransferObject\Exceptions;
 
 use Exception;
 
-class PropertyTypeException extends Exception
+class PropertyValidationException extends Exception
 {
 }

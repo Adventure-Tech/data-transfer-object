@@ -1,7 +1,6 @@
 <?php
 
-use AdventureTech\DataTransferObject\Exceptions\PropertyAssignmentException;
-use AdventureTech\DataTransferObject\Exceptions\PropertyTypeException;
+use AdventureTech\DataTransferObject\Exceptions\PropertyValidationException;
 use AdventureTech\DataTransferObject\Tests\Unit\TestDto\FooDTO;
 use AdventureTech\DataTransferObject\Tests\Unit\TestDto\UserDTO;
 use AdventureTech\DataTransferObject\Tests\Unit\TestDto\UserDTOMissingType;
@@ -18,7 +17,7 @@ test('Error when property is not mapped correctly', function () {
 
     $this->dto = UserDTO::from($this->source);
 })->throws(
-    PropertyAssignmentException::class,
+    PropertyValidationException::class,
     "UserDTO's property firstName is non optional and must have corresponding property on the source"
 );
 
@@ -29,7 +28,7 @@ test('Error when property is missing type declaration', function () {
     ];
 
     $this->dto = UserDTOMissingType::from($this->source);
-})->throws(PropertyTypeException::class);
+})->throws(PropertyValidationException::class);
 
 
 test('Error when source is wrong type', function () {
@@ -45,6 +44,6 @@ test('Error when a field is non optional, but source value is null', function ()
 
     FooDTO::from($source);
 })->throws(
-    PropertyAssignmentException::class,
+    PropertyValidationException::class,
     FooDTO::class."'s property value2 does not allow null. Source property value2 is null."
 );
