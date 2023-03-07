@@ -18,6 +18,7 @@ class MapFromJsonToDto
         $this->jsonDataString = $jsonDataString;
         $this->mapper = new JsonMapper();
         $this->mapper->bEnforceMapType = false;
+        $this->mapper->postMappingMethod = 'init';
     }
 
     /**
