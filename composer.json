@@ -24,7 +24,7 @@
   },
   "require-dev": {
     "jetbrains/phpstorm-attributes": "^1.0",
-    "pestphp/pest": "^2.x-dev",
+    "pestphp/pest": "^2.0",
     "phpunit/phpunit": "^10.0"
   },
   "autoload": {
